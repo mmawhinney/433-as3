@@ -2,14 +2,18 @@
 #include <stdlib.h>
 #include "audioMixer.h"
 
-#define SOURCE_FILE "wave-files/100060__menegass__gui-drum-splash-hard.wav"
+#define BASE_DRUM "wave-files/100051__menegass__gui-drum-bd-hard.wav"
+#define HI_HAT "wave-files/100053__menegass__gui-drum-cc.wav"
+#define SNARE "wave-files/100059__menegass__gui-drum-snare-soft.wav"
 
 int main() {
 
 	AudioMixer_init();
 	// Load wave file we want to play:
 	wavedata_t sampleFile;
-	AudioMixer_readWaveFileIntoMemory(SOURCE_FILE, &sampleFile);
+	wavedata_t otherFile;
+	AudioMixer_readWaveFileIntoMemory(BASE_DRUM, &sampleFile);
+	AudioMixer_readWaveFileIntoMemory(HI_HAT, &otherFile);
 
 	AudioMixer_cleanup();
 }

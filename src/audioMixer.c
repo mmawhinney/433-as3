@@ -167,6 +167,7 @@ void AudioMixer_queueSound(wavedata_t *pSound) {
 		if (freeIndex > -1) {
 			bite = soundBites[freeIndex];
 			bite.pSound = pSound;
+			bite.location = 0;
 			soundBites[freeIndex] = bite;
 		} else {
 			printf("Error: No free sound bite slots found\n");
@@ -177,7 +178,7 @@ void AudioMixer_queueSound(wavedata_t *pSound) {
 
 void AudioMixer_cleanup(void) {
 	printf("Stopping audio...\n");
-	sleep(10);
+	sleep(5);
 	// Stop the PCM generation thread
 	stopping = true;
 	pthread_join(playbackThreadId, NULL);
@@ -246,49 +247,49 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 //	 *    Hint: use memset()
 //	 * 2. Since this is called from a background thread, and soundBites[] array
 //	 *    may be used by any other thread, must synchronize this.
+//	 * 3. Loop through each slot in soundBites[], which are sounds that are either
+//	 *    waiting to be played, or partially already played:
 	memset(playbackBuffer, 0, size * sizeof(short));
 	for (int i = 0; i < MAX_SOUND_BITES; i++) {
 //		- If the sound bite slot is unused, do nothing for this slot.
 		if (soundBites[i].pSound != NULL) {
-
 			playbackSound_t curBite = soundBites[i];
 			wavedata_t sound = *curBite.pSound;
-			int idx = curBite.location;
-			short* values = sound.pData;
 
-//			 * 3. Loop through each slot in soundBites[], which are sounds that are either
-//			 *    waiting to be played, or partially already played:
+			short* values = sound.pData;
+			int idx = curBite.location;
+
 			for (int j = 0; j < size; j++) {
 				short curLoc = playbackBuffer[j];
 				int val = values[idx];
 
-				printf("(%d, ", val);
 				// Trim
+//				When adding values, ensure there is not an overflow. Any values which would
+//				greater than SHRT_MAX should be clipped to SHRT_MAX; likewise for underflow.
 				if ((curLoc + val) >= SHRT_MAX) {
 					val = SHRT_MAX;
 				} else if ((curLoc + val) <= SHRT_MIN) {
 					val = SHRT_MIN;
 				}
-				printf("%d), ", val);
-//				- Otherwise "add" this sound bite's data to the play-back buffer
-//				  (other sound bites needing to be played back will also add to the same data).
-//				- Record that this portion of the sound bite has been played back by incrementing
-//				  the location inside the data where play-back currently is.
+
+//				Otherwise "add" this sound bite's data to the play-back buffer
+//				(other sound bites needing to be played back will also add to the same data).
+//				Record that this portion of the sound bite has been played back by incrementing
+//				the location inside the data where play-back currently is.
 				playbackBuffer[j] += val;
 				idx++;
 
+//				printf("%d, %d, %d, %d \n", val, playbackBuffer[j], idx, j);
 //				If you have now played back the entire sample, free the slot in the
 //		        soundBites[] array.
 				if (idx >= sound.numSamples) {
+					soundBites[i].pSound = NULL;
+					soundBites[i].location = 0;
 					break;
 				}
-				printf("%d, %d, %d, %d \n", val, playbackBuffer[j],
-						idx, j);
+
 			}
-			if (idx >= sound.numSamples) {
-				soundBites[i].pSound = NULL;
-				printf("BOOP\n\n");
-			} else {
+			if (idx < sound.numSamples) {
 				curBite.location = idx;
 				soundBites[i] = curBite;
 			}
@@ -300,8 +301,7 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 	 *
 	 * Notes on "adding" PCM samples:
 	 * - PCM is stored as signed shorts (between SHRT_MIN and SHRT_MAX).
-	 * - When adding values, ensure there is not an overflow. Any values which would
-	 *   greater than SHRT_MAX should be clipped to SHRT_MAX; likewise for underflow.
+
 	 * - Don't overflow any arrays!
 	 * - Efficiency matters here! The compiler may do quite a bit for you, but it doesn't
 	 *   hurt to keep it in mind. Here are some tips for efficiency and readability:
