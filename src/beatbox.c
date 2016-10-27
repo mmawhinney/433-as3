@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "audioMixer.h"
 
-#define SOURCE_FILE "100060__menegass__gui-drum-splash-hard.wav"
+#define SOURCE_FILE "wave-files/100060__menegass__gui-drum-splash-hard.wav"
 
 int main() {
 
