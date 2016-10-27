@@ -1,7 +1,7 @@
 // Incomplete implementation of an audio mixer. Search for "REVISIT" to find things
 // which are left as incomplete.
 // Note: Generates low latency audio on BeagleBone Black; higher latency found on host.
-#include "audioMixer_template.h"
+#include "audioMixer.h"
 #include <alsa/asoundlib.h>
 #include <stdbool.h>
 #include <pthread.h>
@@ -51,9 +51,10 @@ void AudioMixer_init(void) {
 	// Initialize the currently active sound-bites being played
 	// REVISIT:- Implement this. Hint: set the pSound pointer to NULL for each
 	//     sound bite.
-
-
-
+	for(int i = 0; i < MAX_SOUND_BITES; i++) {
+		soundBites[i].pSound = NULL;
+		soundBites[i].location = 0;
+	}
 
 	// Open the PCM output
 	int err = snd_pcm_open(&handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
@@ -81,6 +82,7 @@ void AudioMixer_init(void) {
  	unsigned long unusedBufferSize = 0;
 	snd_pcm_get_params(handle, &unusedBufferSize, &playbackBufferSize);
 	// ..allocate playback buffer:
+	printf("buffer size = %lu\n", playbackBufferSize);
 	playbackBuffer = malloc(playbackBufferSize * sizeof(*playbackBuffer));
 
 	// Launch playback thread:
@@ -151,11 +153,25 @@ void AudioMixer_queueSound(wavedata_t *pSound) {
 	 *    because the application most likely doesn't want to crash just for
 	 *    not being able to play another wave file.
 	 */
-
-
-
-
-
+	pthread_mutex_lock(&audioMutex);
+	{
+		int freeIndex = -1;
+		playbackSound_t bite;
+		for(int i = 0; i < MAX_SOUND_BITES; i++) {
+			bite = soundBites[i];
+			if(bite.pSound != NULL) {
+				freeIndex = i;
+				break;
+			}
+		}
+		if(freeIndex > -1) {
+			bite = soundBites[freeIndex];
+			bite.pSound = pSound;
+		} else {
+			printf("Error: No free sound bite slots found\n");
+		}
+	}	
+	pthread_mutex_unlock(&audioMutex);
 }
 
 void AudioMixer_cleanup(void) {
@@ -264,7 +280,19 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 	 *          ... use someNum vs myArray[someIdx].value;
 	 *
 	 */
+	 pthread_mutex_lock(&audioMutex);
+	 {
+	 	memset(&playbackBuffer, 0, sizeof(*playbackBuffer));
 
+	 	playbackSound_t bite;
+	 	for(int i = 0; i < MAX_SOUND_BITES; i++) {
+	 		bite = soundBites[i];
+	 		if(bite.pSound != NULL) {
+
+	 		}
+	 	}
+	 }
+	 pthread_mutex_unlock(&audioMutex);
 
 
 
