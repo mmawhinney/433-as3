@@ -51,7 +51,7 @@ void AudioMixer_init(void) {
 	// Initialize the currently active sound-bites being played
 	// REVISIT:- Implement this. Hint: set the pSound pointer to NULL for each
 	//     sound bite.
-	for(int i = 0; i < MAX_SOUND_BITES; i++) {
+	for (int i = 0; i < MAX_SOUND_BITES; i++) {
 		soundBites[i].pSound = NULL;
 		soundBites[i].location = 0;
 	}
@@ -126,6 +126,7 @@ void AudioMixer_readWaveFileIntoMemory(char *fileName, wavedata_t *pSound) {
 				pSound->numSamples, fileName, samplesRead);
 		exit(EXIT_FAILURE);
 	}
+	AudioMixer_queueSound(pSound);
 }
 
 void AudioMixer_freeWaveFileData(wavedata_t *pSound) {
@@ -156,26 +157,27 @@ void AudioMixer_queueSound(wavedata_t *pSound) {
 	{
 		int freeIndex = -1;
 		playbackSound_t bite;
-		for(int i = 0; i < MAX_SOUND_BITES; i++) {
+		for (int i = 0; i < MAX_SOUND_BITES; i++) {
 			bite = soundBites[i];
-			if(bite.pSound != NULL) {
+			if (bite.pSound == NULL) {
 				freeIndex = i;
 				break;
 			}
 		}
-		if(freeIndex > -1) {
+		if (freeIndex > -1) {
 			bite = soundBites[freeIndex];
 			bite.pSound = pSound;
+			soundBites[freeIndex] = bite;
 		} else {
 			printf("Error: No free sound bite slots found\n");
 		}
-	}	
+	}
 	pthread_mutex_unlock(&audioMutex);
 }
 
 void AudioMixer_cleanup(void) {
 	printf("Stopping audio...\n");
-	sleep(1);
+	sleep(2);
 	// Stop the PCM generation thread
 	stopping = true;
 	pthread_join(playbackThreadId, NULL);
@@ -240,36 +242,39 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 
 	// Wipe
 	pthread_mutex_lock(&audioMutex);
-	memset(playbackBuffer, 0, size);
-	int playbackCounter = 0;
-	printf("%d\n",(sizeof(soundBites) / sizeof(*soundBites)));
-	for (int i = 0; i < (sizeof(soundBites) / sizeof(*soundBites)); i++) {
-		printf("help\n");
-		if (soundBites[i].pSound != NULL) {
-			playbackSound_t curBite = soundBites[i];
-			short curLoc = playbackBuffer[playbackCounter];
-			wavedata_t sound = *curBite.pSound;
-			int value = *sound.pData;
-			if (value == SHRT_MAX) {
-				value = SHRT_MAX;
-			} else if (value == SHRT_MIN) {
-				value = SHRT_MIN;
-			} else {
-				if (((curLoc + value) < SHRT_MAX
-						|| value > SHRT_MAX)
-						&& (curLoc + value > SHRT_MIN
-								|| value < SHRT_MIN)) {
-					playbackBuffer[playbackCounter] += value;
+	memset(playbackBuffer, 0, size * sizeof(short));
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < MAX_SOUND_BITES; j++) {
+			if (soundBites[j].pSound != NULL) {
+				short curLoc = playbackBuffer[i];
+				playbackSound_t curBite = soundBites[j];
+				wavedata_t sound = *curBite.pSound;
+				int idx = curBite.location;
+
+				short* values = sound.pData;
+				int val = values[idx];
+
+				if ((curLoc + val) >= SHRT_MAX) {
+					val = SHRT_MAX;
+				} else if ((curLoc + val) <= SHRT_MIN) {
+					val = SHRT_MIN;
 				}
+
+				playbackBuffer[i] += val;
+				curBite.location++;
+
+				if (curBite.location >= sound.numSamples) {
+					soundBites[j].pSound = NULL;
+					printf("BOOP\n\n");
+				} else {
+					soundBites[j] = curBite;
+				}
+				printf("%d, %d, %d, %d \n", val, playbackBuffer[i],
+						soundBites[j].location, i);
 			}
-			*sound.pData = value;
-			*curBite.pSound = sound;
-			soundBites[i] = curBite;
-			playbackCounter++;
 		}
 	}
 	pthread_mutex_unlock(&audioMutex);
-
 	/*
 	 * REVISIT: Implement this
 	 * 1. Wipe the playbackBuffer to all 0's to clear any previous PCM data.
@@ -310,19 +315,7 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 	 *          ... use someNum vs myArray[someIdx].value;
 	 *
 	 */
-	 pthread_mutex_lock(&audioMutex);
-	 {
-	 	memset(&playbackBuffer, 0, sizeof(*playbackBuffer));
 
-	 	playbackSound_t bite;
-	 	for(int i = 0; i < MAX_SOUND_BITES; i++) {
-	 		bite = soundBites[i];
-	 		if(bite.pSound != NULL) {
-
-	 		}
-	 	}
-	 }
-	 pthread_mutex_unlock(&audioMutex);
 }
 
 void* playbackThread(void* arg) {
