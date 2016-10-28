@@ -7,6 +7,7 @@
 #define PRESSED_VAL "0\n"
 
 #include "control.h"
+#include "udp.h"
 #include <time.h>
 #include <string.h>
 #include <stdio.h>

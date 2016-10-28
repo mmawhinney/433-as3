@@ -3,7 +3,7 @@ CC=arm-linux-gnueabihf-gcc
 CFLAGS=-std=c99 -Wall -Werror -g -D _POSIX_C_SOURCE=200809L
 LDFLAGS=-L$(HOME)/cmpt433/public/asound_lib_BBB -lm -lpthread -lasound
 
-src_files := beatbox.c audioMixer.c locks.c control.c
+src_files := beatbox.c audioMixer.c locks.c control.c udp.c I2C.c
 src_objs := ${src_files:.c=.o}
 
 PUBDIR = ~/cmpt433/public/myApps
