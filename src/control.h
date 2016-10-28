@@ -1,0 +1,13 @@
+#ifndef CONTROL_H
+#define CONTROL_H
+
+#include <string.h>
+#include <stdbool.h>
+
+void Control_init();
+void* control_thread(void* args);
+void readFromFile(char* fileName, int pin, char* res);
+void exportGpio(int pin);
+void unexportGpio(int pin);
+_Bool checkPin(int pin);
+#endif
