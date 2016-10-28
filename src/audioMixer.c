@@ -2,6 +2,7 @@
 // which are left as incomplete.
 // Note: Generates low latency audio on BeagleBone Black; higher latency found on host.
 #include "audioMixer.h"
+#include "locks.h"
 #include <alsa/asoundlib.h>
 #include <stdbool.h>
 #include <pthread.h>
@@ -35,13 +36,13 @@ typedef struct {
 	// sound has already been played (and hence where to start playing next).
 	int location;
 } playbackSound_t;
+
 static playbackSound_t soundBites[MAX_SOUND_BITES];
 
 // Playback threading
 void* playbackThread(void* arg);
 static _Bool stopping = false;
 static pthread_t playbackThreadId;
-static pthread_mutex_t audioMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int volume = 0;
 
@@ -90,7 +91,7 @@ void AudioMixer_init(void) {
 // Client code must call AudioMixer_freeWaveFileData to free dynamically allocated data.
 void AudioMixer_readWaveFileIntoMemory(char *fileName, wavedata_t *pSound) {
 	assert(pSound);
-
+	lockAudio();
 	// The PCM data in a wave file starts after the header:
 	const int PCM_DATA_OFFSET = 44;
 
@@ -126,6 +127,7 @@ void AudioMixer_readWaveFileIntoMemory(char *fileName, wavedata_t *pSound) {
 				pSound->numSamples, fileName, samplesRead);
 		exit(EXIT_FAILURE);
 	}
+	unlockAudio();
 	AudioMixer_queueSound(pSound);
 }
 
@@ -153,32 +155,29 @@ void AudioMixer_queueSound(wavedata_t *pSound) {
 	 *    because the application most likely doesn't want to crash just for
 	 *    not being able to play another wave file.
 	 */
-	pthread_mutex_lock(&audioMutex);
-	{
-		int freeIndex = -1;
-		playbackSound_t bite;
-		for (int i = 0; i < MAX_SOUND_BITES; i++) {
-			bite = soundBites[i];
-			if (bite.pSound == NULL) {
-				freeIndex = i;
-				break;
-			}
-		}
-		if (freeIndex > -1) {
-			bite = soundBites[freeIndex];
-			bite.pSound = pSound;
-			bite.location = 0;
-			soundBites[freeIndex] = bite;
-		} else {
-			printf("Error: No free sound bite slots found\n");
+	lockAudio();
+	int freeIndex = -1;
+	playbackSound_t bite;
+	for (int i = 0; i < MAX_SOUND_BITES; i++) {
+		bite = soundBites[i];
+		if (bite.pSound == NULL) {
+			freeIndex = i;
+			break;
 		}
 	}
-	pthread_mutex_unlock(&audioMutex);
+	if (freeIndex > -1) {
+		bite = soundBites[freeIndex];
+		bite.pSound = pSound;
+		bite.location = 0;
+		soundBites[freeIndex] = bite;
+	} else {
+		printf("Error: No free sound bite slots found\n");
+	}
+	unlockAudio();
 }
 
 void AudioMixer_cleanup(void) {
 	printf("Stopping audio...\n");
-	sleep(5);
 	// Stop the PCM generation thread
 	stopping = true;
 	pthread_join(playbackThreadId, NULL);
@@ -240,29 +239,26 @@ void AudioMixer_setVolume(int newVolume) {
 //    playbackBuffer: buffer to fill with new PCM data from sound bites.
 //    size: the number of values to store into playbackBuffer
 static void fillPlaybackBuffer(short *playbackBuffer, int size) {
-
 	// Wipe
-	pthread_mutex_lock(&audioMutex);
+	lockAudio();
 //	 * 1. Wipe the playbackBuffer to all 0's to clear any previous PCM data.
 //	 *    Hint: use memset()
 //	 * 2. Since this is called from a background thread, and soundBites[] array
 //	 *    may be used by any other thread, must synchronize this.
 //	 * 3. Loop through each slot in soundBites[], which are sounds that are either
 //	 *    waiting to be played, or partially already played:
-	memset(playbackBuffer, 0, size * sizeof(short));
+	memset(playbackBuffer, 0, size * SAMPLE_SIZE);
 	for (int i = 0; i < MAX_SOUND_BITES; i++) {
 //		- If the sound bite slot is unused, do nothing for this slot.
 		if (soundBites[i].pSound != NULL) {
 			playbackSound_t curBite = soundBites[i];
 			wavedata_t sound = *curBite.pSound;
-
 			short* values = sound.pData;
 			int idx = curBite.location;
 
 			for (int j = 0; j < size; j++) {
 				short curLoc = playbackBuffer[j];
 				int val = values[idx];
-
 				// Trim
 //				When adding values, ensure there is not an overflow. Any values which would
 //				greater than SHRT_MAX should be clipped to SHRT_MAX; likewise for underflow.
@@ -271,14 +267,12 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 				} else if ((curLoc + val) <= SHRT_MIN) {
 					val = SHRT_MIN;
 				}
-
 //				Otherwise "add" this sound bite's data to the play-back buffer
 //				(other sound bites needing to be played back will also add to the same data).
 //				Record that this portion of the sound bite has been played back by incrementing
 //				the location inside the data where play-back currently is.
 				playbackBuffer[j] += val;
 				idx++;
-
 //				printf("%d, %d, %d, %d \n", val, playbackBuffer[j], idx, j);
 //				If you have now played back the entire sample, free the slot in the
 //		        soundBites[] array.
@@ -295,7 +289,7 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 			}
 		}
 	}
-	pthread_mutex_unlock(&audioMutex);
+	unlockAudio();
 	/*
 	 * REVISIT: Implement this
 	 *
@@ -334,7 +328,6 @@ void* playbackThread(void* arg) {
 		// Output the audio
 		snd_pcm_sframes_t frames = snd_pcm_writei(handle, playbackBuffer,
 				playbackBufferSize);
-
 		// Check for (and handle) possible error conditions on output
 		if (frames < 0) {
 			fprintf(stderr, "AudioMixer: writei() returned %li\n", frames);
