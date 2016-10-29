@@ -5,9 +5,10 @@
 #define BASE_DRUM_HARD "wave-files/100051__menegass__gui-drum-bd-hard.wav"
 #define HI_HAT "wave-files/100053__menegass__gui-drum-cc.wav"
 #define SNARE "wave-files/100059__menegass__gui-drum-snare-soft.wav"
+#define NUM_BEATS 3
 
 int bpm = 120;
-
+int currentBeat = 1;
 
 
 int BeatController_getBPM() {
@@ -16,6 +17,18 @@ int BeatController_getBPM() {
 
 void BeatController_setBPM(int newBpm) {
 	bpm = newBpm;
+}
+
+int BeatController_getCurrentBeat() {
+	return currentBeat;
+}
+
+void BeatController_cycleCurrentBeat() {
+	int newBeat = currentBeat + 1;
+	if(newBeat > NUM_BEATS-1) {
+		newBeat = 0;
+	}
+	currentBeat = newBeat;
 }
 
 void BeatController_playRockBeat(int beatCount, wavedata_t *hiHatFile, wavedata_t *bassFile, wavedata_t *snareFile) {

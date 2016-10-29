@@ -11,13 +11,7 @@ const unsigned int MS_TO_NS_FACTOR = 1000000;
 const unsigned int NSEC_MAX = 1000000000;
 
 _Bool playing = false;
-static int currentBeat = 1;
-// static int bpm = 120;
 struct timespec beat_delay;
-
-#define BASE_DRUM_HARD "wave-files/100051__menegass__gui-drum-bd-hard.wav"
-#define HI_HAT "wave-files/100053__menegass__gui-drum-cc.wav"
-#define SNARE "wave-files/100059__menegass__gui-drum-snare-soft.wav"
 
 void Beat_init();
 void setMsDelay(int delayInMs);
@@ -29,11 +23,13 @@ int main() {
 	Control_init();
 	int beatCount = 0;
 	playing = true;
+	int currentBeat = 1;
 	wavedata_t *hiHatFile = malloc(sizeof(wavedata_t));
 	wavedata_t *bassFile = malloc(sizeof(wavedata_t));
 	wavedata_t *snareFile = malloc(sizeof(wavedata_t));
 	while (playing) {
 		calculateDelay();
+		currentBeat = BeatController_getCurrentBeat();
 		switch (currentBeat) {
 		case 0:
 			break;
@@ -62,10 +58,8 @@ int main() {
 }
 
 void Beat_init() {
-	// int delay = ((60 / (bpm / 2)) * 500);
-	// setMsDelay(delay);
 	calculateDelay();
-	currentBeat = 1;
+	// currentBeat = 1;
 	playing = true;
 }
 

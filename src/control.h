@@ -14,5 +14,6 @@ void increaseVolume(void);
 void decreaseVolume(void);
 void increaseTempo(void);
 void decreaseTempo(void);
+void cycleBeat(void);
 
 #endif

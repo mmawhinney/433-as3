@@ -24,15 +24,14 @@ pthread_t controlThreadId;
 
 void Control_init() {
 	polling = true;
-	delay.tv_sec = 1;
-	delay.tv_nsec = 0;
+	delay.tv_sec = 0;
+	delay.tv_nsec = 500000000;
 	pthread_create(&controlThreadId, NULL, control_thread, NULL);
 }
 
 void Control_cleanup() {
 	pthread_join(controlThreadId, NULL);
 }
-
 
 void* control_thread(void* args) {
 	_Bool pressed = false;
@@ -57,6 +56,7 @@ void* control_thread(void* args) {
 				pressed = true;
 			} else if (checkPin(JOY_IN)) {
 				printf("cycle\n");
+				cycleBeat();
 				pressed = true;
 			}
 			if (pressed) {
@@ -139,7 +139,7 @@ void decreaseVolume() {
 
 
 void cycleBeat() {
-
+	BeatController_cycleCurrentBeat();
 }
 
 void increaseTempo() {
