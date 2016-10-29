@@ -6,6 +6,7 @@
 #include "audioMixer.h"
 #include "control.h"
 #include "beatController.h"
+#include "accelController.h"
 
 const unsigned int MS_TO_NS_FACTOR = 1000000;
 const unsigned int NSEC_MAX = 1000000000;
@@ -21,6 +22,7 @@ int main() {
 	AudioMixer_init();
 	Beat_init();
 	Control_init();
+	i2c_Init();
 	int beatCount = 0;
 	playing = true;
 	int currentBeat = 1;
@@ -34,7 +36,6 @@ int main() {
 		case 0:
 			break;
 		case 1: {
-			
 			BeatController_playRockBeat(beatCount, hiHatFile, bassFile, snareFile);
 			break;
 		}
