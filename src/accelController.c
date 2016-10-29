@@ -10,6 +10,8 @@
 #include <pthread.h>
 #include <stdint.h>
 #include "accelController.h"
+#include "audioMixer.h"
+#include "beatController.h"
 
 #define I2CDRV_LINUX_BUS1 "/dev/i2c-1"
 #define I2C_DEVICE_ADDRESS 0x1c
@@ -27,6 +29,10 @@
 int i2cFileDesc;
 pthread_t i2cThreadId;
 
+int16_t x;
+int16_t y;
+int16_t z;
+
 // Creates and launch the thread needed to do i2c work
 void i2c_Init() {
 	initI2cBus();
@@ -37,6 +43,7 @@ void i2c_Init() {
 void* i2c_thread(void* args){
 	while(1) {
 		readFromI2cReg(i2cFileDesc, OUT_X_MSB);
+		
 		struct timespec delay;
 		delay.tv_sec = 0;
 		delay.tv_nsec = 500000000;
@@ -44,6 +51,18 @@ void* i2c_thread(void* args){
 	}
 	
 	pthread_exit(0);
+}
+
+int16_t getXValue() {
+	return x;
+}
+
+int16_t getYValue() {
+	return y;
+}
+
+int16_t getZValue() {
+	return z;
 }
 
 void setActive() {
@@ -92,9 +111,9 @@ void readFromI2cReg(int i2cFileDesc, unsigned char regAddr) {
 	for(int i = 0; i < 7; i++) {
 		printf("res[%d] = %d\n", i, value[i]);
 	}
-	int16_t x = (value[1] << 8) | (value[2]);
-	int16_t y = (value[3] << 8) | (value[4]);
-	int16_t z = (value[5] << 8) | (value[6]);
+	x = (value[1] << 8) | (value[2]);
+	y = (value[3] << 8) | (value[4]);
+	z = (value[5] << 8) | (value[6]);
 	printf("x = %d\n", x);
 	printf("y = %d\n", y);
 	printf("z = %d\n", z);

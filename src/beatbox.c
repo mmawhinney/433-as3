@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <stdint.h>
 #include "audioMixer.h"
 #include "control.h"
 #include "beatController.h"
@@ -33,8 +34,19 @@ int main() {
 		calculateDelay();
 		currentBeat = BeatController_getCurrentBeat();
 		switch (currentBeat) {
-		case 0:
+		case 0: {
+			int x = getXValue();
+			int y = getYValue();
+			int z = getZValue();
+			if(x > 10000 || x < -10000) {
+				BeatController_playHiHat(hiHatFile);
+			} else if(y > 10000 || y < -10000) {
+				BeatController_playSnare(snareFile);
+			} else if(z  < 5000 || z > 25000) {
+				BeatController_playBass(bassFile);
+			}
 			break;
+		}
 		case 1: {
 			BeatController_playRockBeat(beatCount, hiHatFile, bassFile, snareFile);
 			break;

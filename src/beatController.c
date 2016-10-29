@@ -49,3 +49,14 @@ void BeatController_playCustomBeat(int beatCount, wavedata_t *bassFile, wavedata
 	}
 }
 
+void BeatController_playHiHat(wavedata_t *hiHatFile) {
+	AudioMixer_readWaveFileIntoMemory(HI_HAT, hiHatFile);
+}
+
+void BeatController_playBass(wavedata_t *bassFile) {
+	AudioMixer_readWaveFileIntoMemory(BASE_DRUM_HARD, bassFile);
+}
+
+void BeatController_playSnare(wavedata_t *snareFile) {
+	AudioMixer_readWaveFileIntoMemory(SNARE, snareFile);
+}
