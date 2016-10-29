@@ -10,4 +10,9 @@ void readFromFile(char* fileName, int pin, char* res);
 void exportGpio(int pin);
 void unexportGpio(int pin);
 _Bool checkPin(int pin);
+void increaseVolume(void);
+void decreaseVolume(void);
+void increaseTempo(void);
+void decreaseTempo(void);
+
 #endif

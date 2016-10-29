@@ -8,6 +8,8 @@
 
 #include "control.h"
 #include "udp.h"
+#include "audioMixer.h"
+#include "beatController.h"
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
@@ -22,14 +24,15 @@ pthread_t controlThreadId;
 
 void Control_init() {
 	polling = true;
-	delay.tv_sec = 0;
-	delay.tv_nsec = 50000000;
+	delay.tv_sec = 1;
+	delay.tv_nsec = 0;
 	pthread_create(&controlThreadId, NULL, control_thread, NULL);
 }
 
 void Control_cleanup() {
 	pthread_join(controlThreadId, NULL);
 }
+
 
 void* control_thread(void* args) {
 	_Bool pressed = false;
@@ -38,15 +41,19 @@ void* control_thread(void* args) {
 		if (!pressed) {
 			if (checkPin(JOY_UP)) {
 				printf("Vol up\n");
+				increaseVolume();
 				pressed = true;
 			} else if (checkPin(JOY_RIGHT)) {
 				printf("Vol fast\n");
+				increaseTempo();
 				pressed = true;
 			} else if (checkPin(JOY_DOWN)) {
 				printf("Vol dwn\n");
+				decreaseVolume();
 				pressed = true;
 			} else if (checkPin(JOY_LEFT)) {
 				printf("Vol slow\n");
+				decreaseTempo();
 				pressed = true;
 			} else if (checkPin(JOY_IN)) {
 				printf("cycle\n");
@@ -112,4 +119,41 @@ void unexportGpio(int pin) {
 	fprintf(pinFile, "%d", pin);
 
 	fclose(pinFile);
+}
+
+void increaseVolume() {
+	int currentVolume = AudioMixer_getVolume();
+	int newVolume = currentVolume + 5;
+	if(newVolume <= AUDIOMIXER_MAX_VOLUME) {
+		AudioMixer_setVolume(newVolume);
+	}
+}
+
+void decreaseVolume() {
+	int currentVolume = AudioMixer_getVolume();
+	int newVolume = currentVolume - 5;
+	if(newVolume >= 0) {
+		AudioMixer_setVolume(newVolume);
+	}
+}
+
+
+void cycleBeat() {
+
+}
+
+void increaseTempo() {
+	int currentBpm = BeatController_getBPM();
+	int newBpm = currentBpm + 5;
+	if(newBpm <= MAX_BPM) {
+		BeatController_setBPM(newBpm);
+	}
+}
+
+void decreaseTempo() {
+	int currentBpm = BeatController_getBPM();
+	int newBpm = currentBpm - 5;
+	if(newBpm >= MIN_BPM) {
+		BeatController_setBPM(newBpm);
+	}
 }

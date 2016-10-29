@@ -81,7 +81,6 @@ void AudioMixer_init(void) {
 	unsigned long unusedBufferSize = 0;
 	snd_pcm_get_params(handle, &unusedBufferSize, &playbackBufferSize);
 	// ..allocate playback buffer:
-	printf("buffer size = %lu\n", playbackBufferSize);
 	playbackBuffer = malloc(playbackBufferSize * sizeof(*playbackBuffer));
 
 	// Launch playback thread:
@@ -262,8 +261,9 @@ static void fillPlaybackBuffer(short *playbackBuffer, int size) {
 				// Trim
 //				When adding values, ensure there is not an overflow. Any values which would
 //				greater than SHRT_MAX should be clipped to SHRT_MAX; likewise for underflow.
+
 				if ((curLoc + val) >= SHRT_MAX) {
-					val = SHRT_MAX;
+					val = SHRT_MAX-1;
 				} else if ((curLoc + val) <= SHRT_MIN) {
 					val = SHRT_MIN;
 				}
