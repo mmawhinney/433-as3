@@ -15,6 +15,7 @@ void readFromI2cReg(int i2cFileDesc, unsigned char regAddr);
 int16_t getXValue();
 int16_t getYValue();
 int16_t getZValue();
+void i2c_cleanup();
 
 
 #endif

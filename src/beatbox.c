@@ -38,11 +38,11 @@ int main() {
 			int x = getXValue();
 			int y = getYValue();
 			int z = getZValue();
-			if(x > 10000 || x < -10000) {
+			if(x > 7500 || x < -7500) {
 				BeatController_playHiHat(hiHatFile);
-			} else if(y > 10000 || y < -10000) {
+			} else if(y > 7500 || y < -7500) {
 				BeatController_playSnare(snareFile);
-			} else if(z  < 5000 || z > 25000) {
+			} else if(z  < 5000 || z > 20000) {
 				BeatController_playBass(bassFile);
 			}
 			break;

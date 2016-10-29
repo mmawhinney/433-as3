@@ -43,7 +43,7 @@ void* i2c_thread(void* args){
 }
 // Does all the work to enable capes and prepare the i2c bus
 int initI2cBus(void) {
-	// Loads cape if not already loded for i2c
+	// Loads cape if not already loaded for i2c
 	FILE *slot = fopen("/sys/devices/platform/bone_capemgr/slots", "w+");
 	if (!slot) {
 		printf("I2C: Unable to load I2C cape\n");

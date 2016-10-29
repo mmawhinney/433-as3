@@ -24,9 +24,8 @@
 #define OUT_Z_MSB 0x05
 #define OUT_Z_LSB 0x06
 
-
-
 int i2cFileDesc;
+static _Bool running = false;
 pthread_t i2cThreadId;
 
 int16_t x;
@@ -37,20 +36,25 @@ int16_t z;
 void i2c_Init() {
 	initI2cBus();
 	setActive();
+	running = true;
 	pthread_create(&i2cThreadId, NULL, i2c_thread, NULL);
 }
 
-void* i2c_thread(void* args){
-	while(1) {
+void* i2c_thread(void* args) {
+	while (running) {
 		readFromI2cReg(i2cFileDesc, OUT_X_MSB);
-		
+
 		struct timespec delay;
 		delay.tv_sec = 0;
 		delay.tv_nsec = 500000000;
 		nanosleep(&delay, NULL);
 	}
-	
+
 	pthread_exit(0);
+}
+
+void i2c_cleanup() {
+	running = false;
 }
 
 int16_t getXValue() {
@@ -71,13 +75,24 @@ void setActive() {
 
 // Does all the work to enable capes and prepare the i2c bus
 int initI2cBus(void) {
+	// Loads cape if not already loaded for i2c
+	FILE *slot = fopen("/sys/devices/platform/bone_capemgr/slots", "w+");
+	if (!slot) {
+		printf("I2C: Unable to load I2C cape\n");
+		printf(
+				"try:   echo BB-I2C1 > /sys/devices/platform/bone_capemgr/slots\n");
+	}
+	fprintf(slot, "BB-I2C1");
+	fclose(slot);
+
 	// Open the bus
 	i2cFileDesc = open(I2CDRV_LINUX_BUS1, O_RDWR);
 	if (i2cFileDesc < 0) {
 		printf("I2C: Unable to open bus for read/write (%s)\n",
 		I2CDRV_LINUX_BUS1);
 		printf("Error is: %d\n", i2cFileDesc);
-		printf("try:   echo BB-I2C1 > /sys/devices/platform/bone_capemgr/slots\n");
+		printf(
+				"try:   echo BB-I2C1 > /sys/devices/platform/bone_capemgr/slots\n");
 		exit(1);
 	}
 	int result = ioctl(i2cFileDesc, I2C_SLAVE, I2C_DEVICE_ADDRESS);
@@ -102,15 +117,15 @@ void writeI2cReg(int i2cFileDesc, unsigned char regAddr, unsigned char value) {
 
 void readFromI2cReg(int i2cFileDesc, unsigned char regAddr) {
 	int res = write(i2cFileDesc, &regAddr, sizeof(regAddr));
-	if(res != sizeof(regAddr)) {
+	if (res != sizeof(regAddr)) {
 		perror("I2C: Unable to write to i2c register\n");
 	}
 
 	char value[7];
 	res = read(i2cFileDesc, &value, 7);
-	for(int i = 0; i < 7; i++) {
-		printf("res[%d] = %d\n", i, value[i]);
-	}
+//	for (int i = 0; i < 7; i++) {
+//		printf("res[%d] = %d\n", i, value[i]);
+//	}
 	x = (value[1] << 8) | (value[2]);
 	y = (value[3] << 8) | (value[4]);
 	z = (value[5] << 8) | (value[6]);
