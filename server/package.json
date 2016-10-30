@@ -1,0 +1,10 @@
+{
+	"name": "as3-server",
+	"version": "0.0.1",
+	"description": "Node.js server for as3",
+	"dependencies": {
+		"mime": "~1.2.7",
+		"socket.io": "1.5.1",
+		"sprintf-js": "1.0.3"
+	}
+}

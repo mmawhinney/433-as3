@@ -38,28 +38,33 @@ int main() {
 			int x = getXValue();
 			int y = getYValue();
 			int z = getZValue();
-			if(x > 7500 || x < -7500) {
+			if(x > 7500) {
 				BeatController_playHiHat(hiHatFile);
-			} else if(y > 7500 || y < -7500) {
+			} else if(y > 7500) {
 				BeatController_playSnare(snareFile);
-			} else if(z  < 5000 || z > 20000) {
+			} else if(z > 20000) {
 				BeatController_playBass(bassFile);
 			}
+			beat_delay.tv_sec = 0;
+			beat_delay.tv_nsec = 100000000;
+			nanosleep(&beat_delay, NULL);
 			break;
 		}
 		case 1: {
 			BeatController_playRockBeat(beatCount, hiHatFile, bassFile, snareFile);
+			nanosleep(&beat_delay, NULL);
 			break;
 		}
 		//TODO: make better
 		case 2: {
 			BeatController_playCustomBeat(beatCount, bassFile, hiHatFile);
+			nanosleep(&beat_delay, NULL);
 			break;
 		}
 		}
 		beatCount++;
 		// printf("s : %ld, ns: %ld\n", beat_delay.tv_sec, beat_delay.tv_nsec);
-		nanosleep(&beat_delay, NULL);
+		// nanosleep(&beat_delay, NULL);
 		if (beatCount == 8) {
 			beatCount = 0;
 		}
