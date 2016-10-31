@@ -8,9 +8,11 @@
 #include "control.h"
 #include "beatController.h"
 #include "accelController.h"
+#include "udp.h"
 
 const unsigned int MS_TO_NS_FACTOR = 1000000;
 const unsigned int NSEC_MAX = 1000000000;
+const int PORT = 12345;
 
 _Bool playing = false;
 struct timespec beat_delay;
@@ -24,6 +26,7 @@ int main() {
 	Beat_init();
 	Control_init();
 	i2c_Init();
+	udp_startSocket(PORT);
 	int beatCount = 0;
 	playing = true;
 	int currentBeat = 1;
@@ -70,6 +73,7 @@ int main() {
 		}
 	}
 	AudioMixer_cleanup();
+	udp_stop();
 	free(hiHatFile);
 	free(bassFile);
 	free(snareFile);

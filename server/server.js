@@ -48,5 +48,5 @@ function sendFile(response, filePath, fileContents) {
 	response.end(fileContents);
 }
 
-var uptime = require('./lib/uptime');
-uptime.listen(server);
+var udp = require('./lib/udp');
+udp.listen(server);

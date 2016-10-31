@@ -129,21 +129,8 @@ void readFromI2cReg(int i2cFileDesc, unsigned char regAddr) {
 	x = (value[1] << 8) | (value[2]);
 	y = (value[3] << 8) | (value[4]);
 	z = (value[5] << 8) | (value[6]);
-	printf("x = %d\n", x);
-	printf("y = %d\n", y);
-	printf("z = %d\n", z);
+//	printf("x = %d\n", x);
+//	printf("y = %d\n", y);
+//	printf("z = %d\n", z);
 }
 
-// // Read a value from file of given name and given GPIO pin and write to res
-// void writeStringToGpio(char *fileName, int pin, char* res) {
-// 	char dir[BUF];
-// 	snprintf(dir, sizeof(dir), GPIO_DIR "/gpio%d/%s", pin, fileName);
-// 	FILE *file = fopen(dir, "w");
-// 	if (file == NULL) {
-// 		printf("ERROR: Unable to open file (%s) for write\n", fileName);
-// 		exit(-1);
-// 	}
-// 	fprintf(file, "%s", res);
-// 	fclose(file);
-
-// }

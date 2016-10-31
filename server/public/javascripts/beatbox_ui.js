@@ -2,7 +2,7 @@ var socket = io.connect();
 $(document).ready(function() {
 	sendRequest();
 	var requestTimer = setInterval(function() {
-		sendRequest();
+		sendRequest('uptime');
 	}, 1000);
 	socket.on('uptimeReply', function(result) {
 		var time = result.split(" ");
@@ -14,9 +14,49 @@ $(document).ready(function() {
 		var humanReadable = parseInt(hours)+":"+parseInt(minutes)+":"+parseInt(seconds)+" (H:M:S)";
 		$('#status').html(humanReadable);
 	});
+	
+	socket.on('beatReply', function(result){
+		var res = result[result.length-1];
+		if(res == '0') {
+			$('#modeid').html("None");
+		} else if (res == '1') {
+			$('#modeid').html("Beat #1");
+		} else if (res == '2') {
+			$('#modeid').html("Beat #2");
+		}
+	});
+	
+	$('#modeNone').click(function() {
+		sendRequest('beatnone');
+	});
+	
+	$('#modeRock1').click(function() {
+		sendRequest('beatone');
+	});
+	
+	$('#modeRock2').click(function() {
+		sendRequest('beattwo');
+	});
+	
+	$('#volumeDown').click(function() {
+		sendRequest('vdown');
+	});
+	
+	$('#volumeUp').click(function() {
+		sendRequest('vup');
+	});
+	
+	$('#tempoDown').click(function() {
+		sendRequest('tdown');
+	});
+	
+	$('#tempoUp').click(function() {
+		sendRequest('tup');
+	});
 });
 
 
-function sendRequest() {
-	socket.emit('uptime', 'test');
+function sendRequest(cmd) {
+	socket.emit('command', cmd);
 }
+

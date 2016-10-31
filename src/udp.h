@@ -13,12 +13,12 @@ void* udp_socket(void* arg);
 // Process what command was sent
 void udp_command(char* cmd);
 
-void udp_mode(int mode);
 void udp_volume_up();
 void udp_volume_down();
 void udp_tempo_up();
 void udp_tempo_down();
 void udp_play_beat(int beat);
+void udp_uptime();
 
 // ABORT!
 void udp_stop(void);

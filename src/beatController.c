@@ -23,6 +23,10 @@ int BeatController_getCurrentBeat() {
 	return currentBeat;
 }
 
+void BeatController_setBeat(int beat){
+	currentBeat = beat;
+}
+
 void BeatController_cycleCurrentBeat() {
 	int newBeat = currentBeat + 1;
 	if(newBeat > NUM_BEATS-1) {

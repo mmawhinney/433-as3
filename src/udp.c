@@ -1,8 +1,12 @@
 #include "udp.h"
+#include "control.h"
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <errno.h>
+#include <linux/kernel.h>
+#include <sys/sysinfo.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -66,7 +70,7 @@ void* udp_socket(void* arg) {
 		if (strcmp(buf, "") != 0) {
 			//trim string
 			char* command = trimStr(buf);
-
+			printf("%s\n", command);
 			// process command
 			udp_command(command);
 
@@ -80,9 +84,23 @@ void* udp_socket(void* arg) {
 
 // Process what command was sent
 void udp_command(char* cmd) {
-//	if (strncmp(cmd, "help", 4) == 0) {
-//		udp_help();
-//	} else if (strncmp(cmd, "count", 5) == 0) {
+	if (strncmp(cmd, "uptime", 6) == 0) {
+		udp_uptime();
+	} else if (strncmp(cmd, "vdown", 5) == 0) {
+		udp_volume_down();
+	} else if (strncmp(cmd, "vup", 3) == 0) {
+		udp_volume_up();
+	} else if (strncmp(cmd, "tdown", 5) == 0) {
+		udp_tempo_down();
+	} else if (strncmp(cmd, "tup", 3) == 0) {
+		udp_tempo_up();
+	} else if (strncmp(cmd, "beatnone", 8) == 0) {
+		udp_play_beat(0);
+	} else if (strncmp(cmd, "beatone", 7) == 0) {
+		udp_play_beat(1);
+	} else if (strncmp(cmd, "beattwo", 7) == 0) {
+		udp_play_beat(2);
+	}
 //		udp_count();
 //		// if the command contains get
 //	} else if (strstr(cmd, "get") != NULL) {
@@ -134,148 +152,39 @@ void udp_command(char* cmd) {
 //	}
 }
 
-//// Print help screen
-//void udp_help(void) {
-//	// sendback
-//	char* buf = "Accepted command examples:\n"
-//			"count   -- show # primes found\n"
-//			"get 10  -- display prime # 10.\n"
-//			"last 2  -- display the last 2 primes found.\n"
-//			"first 5 -- display the first 5 primes found.\n"
-//			"stop    -- cause the server program to end.\n";
-//	udp_sendback(buf);
-//}
-//
-//// Returns count of primes
-//void udp_count(void) {
-//	char buffer[BUFLEN];
-//	snprintf(buffer, sizeof(buffer), "Number of primes found = %d\n",
-//			PrimeFinder_getNumPrimesFound());
-//	udp_sendback(buffer);
-//}
-//
-//// Get prime at index
-//void udp_get(int num) {
-//	// Index in array
-//	int idx = (num - 1);
-//	// Must fall between 0 and array size
-//	if (idx > -1 && idx < primesFound) {
-//		unsigned long long prime = PrimeFinder_getPrimeByIndex(idx);
-//		char buffer[BUFLEN];
-//		snprintf(buffer, sizeof(buffer), "Prime %d = %lld\n", num, prime);
-//		udp_sendback(buffer);
-//	} else {
-//		udp_error(1);
-//	}
-//}
-//
-void udp_mode(int mode) {
-}
 void udp_volume_up() {
+	increaseVolume();
 }
+
 void udp_volume_down() {
+	decreaseVolume();
 }
+
 void udp_tempo_up() {
+	increaseTempo();
 }
+
 void udp_tempo_down() {
+	decreaseTempo();
 }
+
 void udp_play_beat(int beat) {
+	setBeat(beat);
+	char res[BUFLEN];
+	sprintf(res, "beat%d", beat);
+	udp_sendback(res);
 }
-//// Get last n primes
-//void udp_last(int num) {
-//	int curPrimes = PrimeFinder_getNumPrimesFound() - 1;
-//	if (num > curPrimes || num < 1) {
-//		udp_error(1);
-//	} else {
-//		char buffer[BUFLEN * 2];
-//		snprintf(buffer, sizeof(buffer), "Last %d primes = \n", num);
-//		int printCount = 0;
-//		if (num == 1) {
-//			char buffy[BUFLEN];
-//			snprintf(buffy, sizeof(buffy), "%lld\n",
-//					PrimeFinder_getPrimeByIndex(curPrimes - num));
-//			strcat(buffer, buffy);
-//		} else {
-//			char warning[BUFLEN];
-//			if (num > 50) {
-//				num = 50;
-//				snprintf(warning, sizeof(warning),
-//						"Only returned last %d primes due to memory constraints\n",
-//						num);
-//			}
-//			for (int i = curPrimes - num; i < curPrimes; i++) {
-//				// last elem in line
-//				char buffy[BUFLEN];
-//				if (printCount == 0) {
-//					snprintf(buffy, sizeof(buffy), "%lld, ",
-//							PrimeFinder_getPrimeByIndex(i));
-//				} else if (printCount == num - 1) {
-//					snprintf(buffy, sizeof(buffy), "%lld\n",
-//							PrimeFinder_getPrimeByIndex(i));
-//				} else if ((printCount + 1) % 4 == 0) {
-//					snprintf(buffy, sizeof(buffy), "%lld,\n",
-//							PrimeFinder_getPrimeByIndex(i));
-//				} else {
-//					snprintf(buffy, sizeof(buffy), "%lld, ",
-//							PrimeFinder_getPrimeByIndex(i));
-//				}
-//				strcat(buffer, buffy);
-//				printCount++;
-//			}
-//			if (strlen(warning) > 0)
-//				strcat(buffer, warning);
-//		}
-//		udp_sendback(buffer);
-//	}
-//}
-//
-//// Get first n primes
-//void udp_first(int num) {
-//	int curPrimes = PrimeFinder_getNumPrimesFound() - 1;
-//	if (num > curPrimes || num < 1) {
-//		udp_error(1);
-//	} else {
-//		char buffer[BUFLEN * 2];
-//		snprintf(buffer, sizeof(buffer), "First %d primes = \n", num);
-//		int printCount = 0;
-//		if (num == 1) {
-//			char buffy[BUFLEN];
-//			snprintf(buffy, sizeof(buffy), "%lld\n",
-//					PrimeFinder_getPrimeByIndex(0));
-//			strcat(buffer, buffy);
-//		} else {
-//			char warning[BUFLEN];
-//			if (num > 50) {
-//				num = 50;
-//				snprintf(warning, sizeof(warning),
-//						"Only returned first %d primes due to memory constraints\n",
-//						num);
-//			}
-//			for (int i = 0; i < num; i++) {
-//				// last elem in line
-//				char buffy[BUFLEN];
-//				if (printCount == 0) {
-//					snprintf(buffy, sizeof(buffy), "%lld, ",
-//							PrimeFinder_getPrimeByIndex(i));
-//				} else if (printCount == num - 1) {
-//					snprintf(buffy, sizeof(buffy), "%lld\n",
-//							PrimeFinder_getPrimeByIndex(i));
-//				} else if ((printCount + 1) % 4 == 0) {
-//					snprintf(buffy, sizeof(buffy), "%lld,\n",
-//							PrimeFinder_getPrimeByIndex(i));
-//				} else {
-//					snprintf(buffy, sizeof(buffy), "%lld, ",
-//							PrimeFinder_getPrimeByIndex(i));
-//				}
-//				strcat(buffer, buffy);
-//				printCount++;
-//			}
-//			if (strlen(warning) > 0)
-//				strcat(buffer, warning);
-//		}
-//		udp_sendback(buffer);
-//	}
-//}
+
+void udp_uptime() {
+	struct sysinfo s_info;
+	int error = sysinfo(&s_info);
+	if (error != 0) {
+		printf("code error = %d\n", error);
+	}
+	char res[BUFLEN];
+	sprintf(res, "%ld", s_info.uptime);
+	udp_sendback(res);
+}
 
 // ABORT!
 void udp_stop(void) {
@@ -284,7 +193,6 @@ void udp_stop(void) {
 	pthread_join(udpThreadId, NULL);
 	close(*sock);
 	free(sock);
-
 }
 
 // Decide between errroring unknown commands or out of bounds

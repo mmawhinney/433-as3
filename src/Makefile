@@ -18,9 +18,9 @@ beatbox: $(src_objs)
 # 	mkdir -p $(PUBDIR)/beatbox-wav-files/
 # 	cp -R beatbox-wave-files/* $(PUBDIR)/beatbox-wav-files/
 
-# node:
-# 	mkdir -p $(PUBDIR)/beatbox-server-copy/
-# 	cp -R as3-server/* $(PUBDIR)/beatbox-server-copy
+node:
+	mkdir -p $(PUBDIR)/beatbox-server-copy/
+	cp -R as3-server/* $(PUBDIR)/beatbox-server-copy
 
 clean:
 	rm *.o beatbox

@@ -36,26 +36,20 @@ void Control_cleanup() {
 void* control_thread(void* args) {
 	_Bool pressed = false;
 	while (polling) {
-		// TODO: Debounce
 		if (!pressed) {
 			if (checkPin(JOY_UP)) {
-				printf("Vol up\n");
 				increaseVolume();
 				pressed = true;
 			} else if (checkPin(JOY_RIGHT)) {
-				printf("Vol fast\n");
 				increaseTempo();
 				pressed = true;
 			} else if (checkPin(JOY_DOWN)) {
-				printf("Vol dwn\n");
 				decreaseVolume();
 				pressed = true;
 			} else if (checkPin(JOY_LEFT)) {
-				printf("Vol slow\n");
 				decreaseTempo();
 				pressed = true;
 			} else if (checkPin(JOY_IN)) {
-				printf("cycle\n");
 				cycleBeat();
 				pressed = true;
 			}
@@ -124,7 +118,7 @@ void unexportGpio(int pin) {
 void increaseVolume() {
 	int currentVolume = AudioMixer_getVolume();
 	int newVolume = currentVolume + 5;
-	if(newVolume <= AUDIOMIXER_MAX_VOLUME) {
+	if (newVolume <= AUDIOMIXER_MAX_VOLUME) {
 		AudioMixer_setVolume(newVolume);
 	}
 }
@@ -132,11 +126,13 @@ void increaseVolume() {
 void decreaseVolume() {
 	int currentVolume = AudioMixer_getVolume();
 	int newVolume = currentVolume - 5;
-	if(newVolume >= 0) {
+	if (newVolume >= 0) {
 		AudioMixer_setVolume(newVolume);
 	}
 }
-
+void setBeat(int beat) {
+	BeatController_setBeat(beat);
+}
 
 void cycleBeat() {
 	BeatController_cycleCurrentBeat();
@@ -145,7 +141,7 @@ void cycleBeat() {
 void increaseTempo() {
 	int currentBpm = BeatController_getBPM();
 	int newBpm = currentBpm + 5;
-	if(newBpm <= MAX_BPM) {
+	if (newBpm <= MAX_BPM) {
 		BeatController_setBPM(newBpm);
 	}
 }
@@ -153,7 +149,7 @@ void increaseTempo() {
 void decreaseTempo() {
 	int currentBpm = BeatController_getBPM();
 	int newBpm = currentBpm - 5;
-	if(newBpm >= MIN_BPM) {
+	if (newBpm >= MIN_BPM) {
 		BeatController_setBPM(newBpm);
 	}
 }
