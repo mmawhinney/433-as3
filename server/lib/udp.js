@@ -49,6 +49,10 @@ function handleCommand(socket) {
 					socket.emit('uptimeReply', reply);
 				} else if (data == 'beatnone' || data == 'beatone' || data == 'beattwo') {
 					socket.emit('beatReply', reply);
+				} else if (data == 'vup' || data == 'vdown' || data == 'vol') {
+					socket.emit('volumeReply', reply);
+				} else if (data == 'tup' || data == 'tdown' || data == 'tempo') {
+					socket.emit('tempoReply', reply);
 				} else {
 					socket.emit('commandReply', reply);
 				}

@@ -130,6 +130,11 @@ void decreaseVolume() {
 		AudioMixer_setVolume(newVolume);
 	}
 }
+
+int getVolume() {
+	return AudioMixer_getVolume();
+}
+
 void setBeat(int beat) {
 	BeatController_setBeat(beat);
 }
@@ -152,4 +157,8 @@ void decreaseTempo() {
 	if (newBpm >= MIN_BPM) {
 		BeatController_setBPM(newBpm);
 	}
+}
+
+int getTempo() {
+	return BeatController_getBPM();
 }

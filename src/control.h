@@ -11,6 +11,8 @@ void exportGpio(int pin);
 void unexportGpio(int pin);
 _Bool checkPin(int pin);
 void setBeat(int beat);
+int getTempo();
+int getVolume();
 void increaseVolume(void);
 void decreaseVolume(void);
 void increaseTempo(void);

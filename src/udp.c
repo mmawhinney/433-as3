@@ -70,7 +70,6 @@ void* udp_socket(void* arg) {
 		if (strcmp(buf, "") != 0) {
 			//trim string
 			char* command = trimStr(buf);
-			printf("%s\n", command);
 			// process command
 			udp_command(command);
 
@@ -90,6 +89,14 @@ void udp_command(char* cmd) {
 		udp_volume_down();
 	} else if (strncmp(cmd, "vup", 3) == 0) {
 		udp_volume_up();
+	} else if (strncmp(cmd, "vol", 3) == 0) {
+		char res[BUFLEN];
+		sprintf(res, "%d", getVolume());
+		udp_sendback(res);
+	} else if (strncmp(cmd, "tempo", 3) == 0) {
+		char res[BUFLEN];
+		sprintf(res, "%d", getTempo());
+		udp_sendback(res);
 	} else if (strncmp(cmd, "tdown", 5) == 0) {
 		udp_tempo_down();
 	} else if (strncmp(cmd, "tup", 3) == 0) {
@@ -100,72 +107,39 @@ void udp_command(char* cmd) {
 		udp_play_beat(1);
 	} else if (strncmp(cmd, "beattwo", 7) == 0) {
 		udp_play_beat(2);
+	} else if (strcmp(cmd, "stop") == 0) {
+		udp_stop();
+	} else {
+		udp_error(0);
 	}
-//		udp_count();
-//		// if the command contains get
-//	} else if (strstr(cmd, "get") != NULL) {
-//		char* separate;
-//		// check if first word is get
-//		separate = strtok(cmd, " ");
-//		if (strncmp(separate, "get", 3) == 0) {
-//			separate = strtok(NULL, " ");
-//			// next one should be an int
-//			if (separate != NULL)
-//				udp_get(atoi(separate));
-//			else
-//				udp_error(0);
-//		} else {
-//			udp_error(0);
-//		}
-//	} else if (strstr(cmd, "first") != NULL) {
-//		char* separate;
-//		// check if first word is first
-//		separate = strtok(cmd, " ");
-//		if (strncmp(separate, "first", 5) == 0) {
-//			separate = strtok(NULL, " ");
-//			// next one should be an int
-//			if (separate != NULL)
-//				udp_first(atoi(separate));
-//			else
-//				udp_first(1);
-//		} else {
-//			udp_error(0);
-//		}
-//	} else if (strstr(cmd, "last") != NULL) {
-//		char* separate;
-//		// check if first word is last
-//		separate = strtok(cmd, " ");
-//		if (strncmp(separate, "last", 4) == 0) {
-//			separate = strtok(NULL, " ");
-//			// next one should be an int
-//			if (separate != NULL) {
-//				udp_last(atoi(separate));
-//			} else
-//				udp_last(1);
-//		} else {
-//			udp_error(0);
-//		}
-//	} else if (strcmp(cmd, "stop") == 0) {
-//		udp_stop();
-//	} else {
-//		udp_error(0);
-//	}
 }
 
 void udp_volume_up() {
 	increaseVolume();
+	char res[BUFLEN];
+	sprintf(res, "%d", getVolume());
+	udp_sendback(res);
 }
 
 void udp_volume_down() {
 	decreaseVolume();
+	char res[BUFLEN];
+	sprintf(res, "%d", getVolume());
+	udp_sendback(res);
 }
 
 void udp_tempo_up() {
 	increaseTempo();
+	char res[BUFLEN];
+	sprintf(res, "%d", getTempo());
+	udp_sendback(res);
 }
 
 void udp_tempo_down() {
 	decreaseTempo();
+	char res[BUFLEN];
+	sprintf(res, "%d", getTempo());
+	udp_sendback(res);
 }
 
 void udp_play_beat(int beat) {

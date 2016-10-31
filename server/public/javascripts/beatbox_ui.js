@@ -1,6 +1,8 @@
 var socket = io.connect();
 $(document).ready(function() {
-	sendRequest();
+	sendRequest('beatone');
+	sendRequest('vol');
+	sendRequest('tempo');
 	var requestTimer = setInterval(function() {
 		sendRequest('uptime');
 	}, 1000);
@@ -15,7 +17,7 @@ $(document).ready(function() {
 		$('#status').html(humanReadable);
 	});
 	
-	socket.on('beatReply', function(result){
+	socket.on('beatReply', function(result) {
 		var res = result[result.length-1];
 		if(res == '0') {
 			$('#modeid').html("None");
@@ -24,6 +26,14 @@ $(document).ready(function() {
 		} else if (res == '2') {
 			$('#modeid').html("Beat #2");
 		}
+	});
+	
+	socket.on('tempoReply', function(result) {
+		$('#tempoId').val(result);
+	});
+	
+	socket.on('volumeReply', function(result) {
+		$('#volumeid').val(result);
 	});
 	
 	$('#modeNone').click(function() {
