@@ -33,13 +33,15 @@ $(document).ready(function() {
 	});
 	
 	socket.on('beatReply', function(result) {
-		clearTimeout(serverErrorTimer);
 		var res = result[result.length-1];
 		if(res == '0') {
+			clearTimeout(serverErrorTimer);
 			$('#modeid').html("None");
 		} else if (res == '1') {
+			clearTimeout(serverErrorTimer);
 			$('#modeid').html("Beat #1");
 		} else if (res == '2') {
+			clearTimeout(serverErrorTimer);
 			$('#modeid').html("Beat #2");
 		}
 	});
