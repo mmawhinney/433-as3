@@ -3,9 +3,12 @@ $(document).ready(function() {
 	sendRequest('beatone');
 	sendRequest('vol');
 	sendRequest('tempo');
+	
+
 	var requestTimer = setInterval(function() {
-		sendRequest('uptime');
+		socket.emit('uptime', '');
 	}, 1000);
+	
 	socket.on('uptimeReply', function(result) {
 		var time = result.split(" ");
 		var intTime = parseInt(time[0]);
@@ -28,6 +31,14 @@ $(document).ready(function() {
 		}
 	});
 	
+	socket.on('errorReply', function(result) {
+		$('#error-text').text(result.toString('utf8'));
+		$('#error-box').show();
+		var errorTimer = setTimeout(function() {
+			$('#error-box').hide();
+		}, 10000);
+	});
+
 	socket.on('tempoReply', function(result) {
 		$('#tempoId').val(result);
 	});

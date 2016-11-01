@@ -14,7 +14,20 @@ exports.listen = function(server) {
 };
 
 function handleCommand(socket) {
-	// Pased string of comamnd to relay
+	// Pased string of comamnd to relay	
+	var fs = require('fs');
+	socket.on('uptime', function(data) {
+		var path = "/proc/uptime";
+		var message;
+		fs.readFile(path, function(err, data) {
+			if (err) {
+				message = "Connection lost";
+			} else {
+				message = data.toString('utf8');
+			}
+			socket.emit('uptimeReply', message);
+		});
+	});
 
 	socket.on('command', function(data) {
 		console.log('udp command: ' + data);
@@ -38,16 +51,20 @@ function handleCommand(socket) {
 				console.log('UDP Client: listening on ' + address.address + ":"
 						+ address.port);
 			});
+
+			var errorTimer = setTimeout(function() {
+				socket.emit('errorReply', 'Application Error: No response recieved from beatbox. Is it running?');
+			}, 5000);
+
 			// Handle an incoming message over the UDP from the local
 			// application.
 			client.on('message', function(message, remote) {
+				clearTimeout(errorTimer);
 				console.log("UDP Client: message Rx" + remote.address + ':'
 						+ remote.port + ' - ' + message);
 
 				var reply = message.toString('utf8')
-				if (data == 'uptime') {
-					socket.emit('uptimeReply', reply);
-				} else if (data == 'beatnone' || data == 'beatone' || data == 'beattwo') {
+				if (data == 'beatnone' || data == 'beatone' || data == 'beattwo') {
 					socket.emit('beatReply', reply);
 				} else if (data == 'vup' || data == 'vdown' || data == 'vol') {
 					socket.emit('volumeReply', reply);
