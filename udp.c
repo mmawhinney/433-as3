@@ -85,9 +85,7 @@ void* udp_socket(void* arg) {
 
 // Process what command was sent
 void udp_command(char* cmd) {
-	if (strncmp(cmd, "uptime", 6) == 0) {
-		udp_uptime();
-	} else if (strncmp(cmd, "vdown", 5) == 0) {
+	if (strncmp(cmd, "vdown", 5) == 0) {
 		udp_volume_down();
 	} else if (strncmp(cmd, "vup", 3) == 0) {
 		udp_volume_up();
@@ -154,17 +152,6 @@ void udp_play_beat(int beat) {
 	setBeat(beat);
 	char res[BUFLEN];
 	sprintf(res, "beat%d", beat);
-	udp_sendback(res);
-}
-
-void udp_uptime() {
-	struct sysinfo s_info;
-	int error = sysinfo(&s_info);
-	if (error != 0) {
-		printf("code error = %d\n", error);
-	}
-	char res[BUFLEN];
-	sprintf(res, "%ld", s_info.uptime);
 	udp_sendback(res);
 }
 

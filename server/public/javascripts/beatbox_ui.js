@@ -1,14 +1,28 @@
 var socket = io.connect();
+var serverErrorTimer = 0;
 $(document).ready(function() {
+	
+
 	sendRequest('beatone');
 	sendRequest('vol');
 	sendRequest('tempo');
+	// clearTimeout(serverErrorTimer);
 	
 
 	var requestTimer = setInterval(function() {
 		socket.emit('uptime', '');
 	}, 1000);
 	
+	socket.on('errorReply', function(result) {
+		console.log("hit error replay...");
+		clearTimeout(serverErrorTimer);
+		$('#error-text').text(result.toString('utf8'));
+		$('#error-box').show();
+		var errorTimer = setTimeout(function() {
+			$('#error-box').hide();
+		}, 10000);
+	});
+
 	socket.on('uptimeReply', function(result) {
 		var time = result.split(" ");
 		var intTime = parseInt(time[0]);
@@ -21,6 +35,7 @@ $(document).ready(function() {
 	});
 	
 	socket.on('beatReply', function(result) {
+		clearTimeout(serverErrorTimer);
 		var res = result[result.length-1];
 		if(res == '0') {
 			$('#modeid').html("None");
@@ -31,19 +46,14 @@ $(document).ready(function() {
 		}
 	});
 	
-	socket.on('errorReply', function(result) {
-		$('#error-text').text(result.toString('utf8'));
-		$('#error-box').show();
-		var errorTimer = setTimeout(function() {
-			$('#error-box').hide();
-		}, 10000);
-	});
 
 	socket.on('tempoReply', function(result) {
+		clearTimeout(serverErrorTimer);
 		$('#tempoId').val(result);
 	});
 	
 	socket.on('volumeReply', function(result) {
+		clearTimeout(serverErrorTimer);
 		$('#volumeid').val(result);
 	});
 	
@@ -91,5 +101,17 @@ $(document).ready(function() {
 
 function sendRequest(cmd) {
 	socket.emit('command', cmd);
+	if(serverErrorTimer != null) {
+		clearTimeout(serverErrorTimer);
+	} else {
+		serverErrorTimer = setTimeout(function() {
+		$('#error-box').show();
+		$('#error-text').text('Server Error: No response received from server. Is it running?');
+			var errorTimer = setTimeout(function() {
+				$('#error-box').hide();
+			}, 10000);
+		}, 7000);
+	}
+	
 }
 

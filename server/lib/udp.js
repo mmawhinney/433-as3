@@ -54,7 +54,7 @@ function handleCommand(socket) {
 
 			var errorTimer = setTimeout(function() {
 				socket.emit('errorReply', 'Application Error: No response recieved from beatbox. Is it running?');
-			}, 5000);
+			}, 4000);
 
 			// Handle an incoming message over the UDP from the local
 			// application.
