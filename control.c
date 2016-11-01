@@ -54,9 +54,6 @@ void* control_thread(void* args) {
 				pressed = true;
 			}
 			if (pressed) {
-				char res[BUFLEN];
-				sprintf(res, "%s", "update");
-				udp_sendback(res);
 				nanosleep(&delay, NULL);
 				pressed = false;
 			}
