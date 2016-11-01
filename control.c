@@ -39,18 +39,12 @@ void* control_thread(void* args) {
 		if (!pressed) {
 			if (checkPin(JOY_UP)) {
 				increaseVolume();
-				char res[BUFLEN];
-				sprintf(res, "%d", getVolume());
-				udp_sendback(res);
 				pressed = true;
 			} else if (checkPin(JOY_RIGHT)) {
 				increaseTempo();
 				pressed = true;
 			} else if (checkPin(JOY_DOWN)) {
 				decreaseVolume();
-				char res[BUFLEN];
-				sprintf(res, "%d", getVolume());
-				udp_sendback(res);
 				pressed = true;
 			} else if (checkPin(JOY_LEFT)) {
 				decreaseTempo();
@@ -60,6 +54,9 @@ void* control_thread(void* args) {
 				pressed = true;
 			}
 			if (pressed) {
+				char res[BUFLEN];
+				sprintf(res, "%s", "update");
+				udp_sendback(res);
 				nanosleep(&delay, NULL);
 				pressed = false;
 			}

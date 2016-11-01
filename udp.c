@@ -217,7 +217,6 @@ void udp_error(int opt) {
 // Send UDP packet back to caller
 void udp_sendback(char* res) {
 	socklen_t slen = sizeof(si_other);
-
 	if (sendto(*sock, res, strlen(res), 0, (struct sockaddr *) &si_other, slen)
 			== -1) {
 		udp_err("sendto\n");

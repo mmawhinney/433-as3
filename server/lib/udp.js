@@ -70,6 +70,8 @@ function handleCommand(socket) {
 					socket.emit('volumeReply', reply);
 				} else if (data == 'tup' || data == 'tdown' || data == 'tempo') {
 					socket.emit('tempoReply', reply);
+				} else if (data == 'update') {
+					socket.emit('heartBeat');
 				} else {
 					socket.emit('commandReply', reply);
 				}

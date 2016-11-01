@@ -1,15 +1,11 @@
 var socket = io.connect();
 var serverErrorTimer;
 $(document).ready(function() {
-	
-	sendRequest('beatone');
-	
+	sendRequest('update');
 	
 	var requestTimer = setInterval(function() {
 		socket.emit('uptime', '');
-		sendRequest('vol');
-		sendRequest('tempo');
-		sendRequest('beat');
+		sendRequest('update');
 	}, 1000);
 	
 	socket.on('errorReply', function(result) {
@@ -32,16 +28,21 @@ $(document).ready(function() {
 		$('#status').html(humanReadable);
 	});
 	
+	socket.on('heartBeat', function(result) {
+		clearTimeout(serverErrorTimer);
+		sendRequest('vol');
+		sendRequest('tempo');
+		sendRequest('beat');
+	});
+	
 	socket.on('beatReply', function(result) {
+		clearTimeout(serverErrorTimer);
 		var res = result[result.length-1];
 		if(res == '0') {
-			clearTimeout(serverErrorTimer);
 			$('#modeid').html("None");
 		} else if (res == '1') {
-			clearTimeout(serverErrorTimer);
 			$('#modeid').html("Beat #1");
 		} else if (res == '2') {
-			clearTimeout(serverErrorTimer);
 			$('#modeid').html("Beat #2");
 		}
 	});
