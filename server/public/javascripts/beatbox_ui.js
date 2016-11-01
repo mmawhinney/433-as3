@@ -1,20 +1,16 @@
 var socket = io.connect();
-var serverErrorTimer = 0;
+var serverErrorTimer;
 $(document).ready(function() {
 	
-
 	sendRequest('beatone');
 	sendRequest('vol');
 	sendRequest('tempo');
-	// clearTimeout(serverErrorTimer);
 	
-
 	var requestTimer = setInterval(function() {
 		socket.emit('uptime', '');
 	}, 1000);
 	
 	socket.on('errorReply', function(result) {
-		console.log("hit error replay...");
 		clearTimeout(serverErrorTimer);
 		$('#error-text').text(result.toString('utf8'));
 		$('#error-box').show();
@@ -100,18 +96,17 @@ $(document).ready(function() {
 
 
 function sendRequest(cmd) {
+	console.log("send request");
 	socket.emit('command', cmd);
-	if(serverErrorTimer != null) {
+	if(serverErrorTimer) {
 		clearTimeout(serverErrorTimer);
-	} else {
-		serverErrorTimer = setTimeout(function() {
-		$('#error-box').show();
-		$('#error-text').text('Server Error: No response received from server. Is it running?');
-			var errorTimer = setTimeout(function() {
-				$('#error-box').hide();
-			}, 10000);
-		}, 7000);
-	}
-	
+	} 
+	serverErrorTimer = setTimeout(function() {
+	$('#error-box').show();
+	$('#error-text').text('Server Error: No response received from server. Is it running?');
+		var errorTimer = setTimeout(function() {
+			$('#error-box').hide();
+		}, 10000);
+	}, 7000);
 }
 
