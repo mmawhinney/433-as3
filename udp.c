@@ -96,10 +96,6 @@ void udp_command(char* cmd) {
 		char res[BUFLEN];
 		sprintf(res, "%d", getTempo());
 		udp_sendback(res);
-	} else if (strncmp(cmd, "beat", 3) == 0) {
-		char res[BUFLEN];
-		sprintf(res, "beat%d", getBeat());
-		udp_sendback(res);
 	} else if (strncmp(cmd, "tdown", 5) == 0) {
 		udp_tempo_down();
 	} else if (strncmp(cmd, "tup", 3) == 0) {
@@ -110,6 +106,10 @@ void udp_command(char* cmd) {
 		udp_play_beat(1);
 	} else if (strncmp(cmd, "beattwo", 7) == 0) {
 		udp_play_beat(2);
+	} else if (strncmp(cmd, "beat", 3) == 0) {
+		char res[BUFLEN];
+		sprintf(res, "beat%d", getBeat());
+		udp_sendback(res);
 	} else if (strncmp(cmd, "bass", 4) == 0) {
 		udp_play_bass();
 	} else if (strncmp(cmd, "snare", 5) == 0) {
