@@ -1,5 +1,8 @@
+#include "audioMixer.h"
 #include "udp.h"
 #include "control.h"
+#include "beatController.h"
+
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -17,7 +20,6 @@
 #include <pthread.h>
 
 // Taking from guide provided in student links
-#define BUFLEN 512
 #define NPACK 10
 #define SRV_IP "0.0.0.0"
 
@@ -107,6 +109,12 @@ void udp_command(char* cmd) {
 		udp_play_beat(1);
 	} else if (strncmp(cmd, "beattwo", 7) == 0) {
 		udp_play_beat(2);
+	} else if (strncmp(cmd, "bass", 4) == 0) {
+		udp_play_bass();
+	} else if (strncmp(cmd, "snare", 5) == 0) {
+		udp_play_snare();
+	} else if(strncmp(cmd, "hihat", 5) == 0) {
+		udp_play_hihat();
 	} else if (strcmp(cmd, "stop") == 0) {
 		udp_stop();
 	} else {
@@ -160,6 +168,34 @@ void udp_uptime() {
 	udp_sendback(res);
 }
 
+void playDrumDelay() {
+	struct timespec delay;
+	delay.tv_sec = 0;
+	delay.tv_nsec = 300000000;
+	nanosleep(&delay, NULL);
+}
+
+void udp_play_bass() {
+	wavedata_t *bass = malloc(sizeof(wavedata_t));
+	BeatController_playBass(bass);
+	playDrumDelay();
+	free(bass);
+}
+
+void udp_play_snare() {
+	wavedata_t *snare = malloc(sizeof(wavedata_t));
+	BeatController_playSnare(snare);
+	playDrumDelay();
+	free(snare);
+}
+
+void udp_play_hihat() {
+	wavedata_t *hihat = malloc(sizeof(wavedata_t));
+	BeatController_playHiHat(hihat);
+	playDrumDelay();
+	free(hihat);
+}
+
 // ABORT!
 void udp_stop(void) {
 	udp_sendback("Stopping program...\n");
@@ -205,3 +241,5 @@ char* trimStr(char* str) {
 	*(end + 1) = 0;
 	return str;
 }
+
+

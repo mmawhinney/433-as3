@@ -63,6 +63,18 @@ $(document).ready(function() {
 	$('#tempoUp').click(function() {
 		sendRequest('tup');
 	});
+
+	$('#bass').click(function() {
+		sendRequest('bass');
+	});
+
+	$('#snare').click(function() {
+		sendRequest('snare');
+	});
+
+	$('#hihat').click(function() {
+		sendRequest('hihat');
+	});
 });
 
 

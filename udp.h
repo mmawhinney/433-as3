@@ -1,6 +1,8 @@
 #ifndef UDP_H_
 #define UDP_H_
 
+#define BUFLEN 512
+
 // Helper error function
 void udp_err(char *err);
 
@@ -19,6 +21,9 @@ void udp_tempo_up();
 void udp_tempo_down();
 void udp_play_beat(int beat);
 void udp_uptime();
+void udp_play_bass();
+void udp_play_snare();
+void udp_play_hihat();
 
 // ABORT!
 void udp_stop(void);
