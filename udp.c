@@ -167,6 +167,9 @@ void udp_play_bass() {
 	BeatController_playBass(bass);
 	playDrumDelay();
 	free(bass);
+	char res[BUFLEN];
+	sprintf(res, "played bass");
+	udp_sendback(res);
 }
 
 void udp_play_snare() {
@@ -174,6 +177,9 @@ void udp_play_snare() {
 	BeatController_playSnare(snare);
 	playDrumDelay();
 	free(snare);
+	char res[BUFLEN];
+	sprintf(res, "played snare");
+	udp_sendback(res);
 }
 
 void udp_play_hihat() {
@@ -181,6 +187,9 @@ void udp_play_hihat() {
 	BeatController_playHiHat(hihat);
 	playDrumDelay();
 	free(hihat);
+	char res[BUFLEN];
+	sprintf(res, "played hihat");
+	udp_sendback(res);
 }
 
 // ABORT!
