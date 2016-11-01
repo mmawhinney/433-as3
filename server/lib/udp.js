@@ -64,7 +64,7 @@ function handleCommand(socket) {
 						+ remote.port + ' - ' + message);
 
 				var reply = message.toString('utf8')
-				if (data == 'beatnone' || data == 'beatone' || data == 'beattwo') {
+				if (data == 'beatnone' || data == 'beatone' || data == 'beattwo' || data == 'beat') {
 					socket.emit('beatReply', reply);
 				} else if (data == 'vup' || data == 'vdown' || data == 'vol') {
 					socket.emit('volumeReply', reply);

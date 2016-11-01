@@ -60,7 +60,6 @@ int main() {
 			nanosleep(&beat_delay, NULL);
 			break;
 		}
-		//TODO: make better
 		case 2: {
 			BeatController_playCustomBeat(beatCount, bassFile, hiHatFile);
 			nanosleep(&beat_delay, NULL);

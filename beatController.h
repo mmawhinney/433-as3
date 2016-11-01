@@ -10,6 +10,7 @@ void BeatController_playRockBeat(int beatCount, wavedata_t *hiHatFile, wavedata_
 void BeatController_playCustomBeat(int beatCount, wavedata_t *bassFile, wavedata_t *hiHatFile);
 int BeatController_getCurrentBeat(void);
 void BeatController_setBeat(int beat);
+int BeatController_getBeat();
 void BeatController_cycleCurrentBeat(void);
 void BeatController_playHiHat(wavedata_t *hiHatFile);
 void BeatController_playBass(wavedata_t *bassFile);

@@ -145,6 +145,10 @@ void setBeat(int beat) {
 	BeatController_setBeat(beat);
 }
 
+int getBeat() {
+	return BeatController_getBeat();
+}
+
 void cycleBeat() {
 	BeatController_cycleCurrentBeat();
 }

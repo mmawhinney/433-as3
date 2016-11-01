@@ -3,11 +3,13 @@ var serverErrorTimer;
 $(document).ready(function() {
 	
 	sendRequest('beatone');
-	sendRequest('vol');
-	sendRequest('tempo');
+	
 	
 	var requestTimer = setInterval(function() {
 		socket.emit('uptime', '');
+		sendRequest('vol');
+		sendRequest('tempo');
+		sendRequest('beat');
 	}, 1000);
 	
 	socket.on('errorReply', function(result) {

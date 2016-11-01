@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include "audioMixer.h"
 
-#define BASE_DRUM_HARD "wave-files/100051__menegass__gui-drum-bd-hard.wav"
-#define HI_HAT "wave-files/100053__menegass__gui-drum-cc.wav"
-#define SNARE "wave-files/100059__menegass__gui-drum-snare-soft.wav"
+#define BASE_DRUM_HARD "beatbox-wav-files/100051__menegass__gui-drum-bd-hard.wav"
+#define HI_HAT "beatbox-wav-files/100053__menegass__gui-drum-cc.wav"
+#define SNARE "beatbox-wav-files/100059__menegass__gui-drum-snare-soft.wav"
 #define NUM_BEATS 3
 
 int bpm = 120;
@@ -25,6 +25,10 @@ int BeatController_getCurrentBeat() {
 
 void BeatController_setBeat(int beat){
 	currentBeat = beat;
+}
+
+int BeatController_getBeat() {
+	return currentBeat;
 }
 
 void BeatController_cycleCurrentBeat() {

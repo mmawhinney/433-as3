@@ -3,7 +3,6 @@
 #include "control.h"
 #include "beatController.h"
 
-
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -97,6 +96,10 @@ void udp_command(char* cmd) {
 		char res[BUFLEN];
 		sprintf(res, "%d", getTempo());
 		udp_sendback(res);
+	} else if (strncmp(cmd, "beat", 3) == 0) {
+		char res[BUFLEN];
+		sprintf(res, "beat%d", getBeat());
+		udp_sendback(res);
 	} else if (strncmp(cmd, "tdown", 5) == 0) {
 		udp_tempo_down();
 	} else if (strncmp(cmd, "tup", 3) == 0) {
@@ -111,7 +114,7 @@ void udp_command(char* cmd) {
 		udp_play_bass();
 	} else if (strncmp(cmd, "snare", 5) == 0) {
 		udp_play_snare();
-	} else if(strncmp(cmd, "hihat", 5) == 0) {
+	} else if (strncmp(cmd, "hihat", 5) == 0) {
 		udp_play_hihat();
 	} else if (strcmp(cmd, "stop") == 0) {
 		udp_stop();
@@ -237,5 +240,4 @@ char* trimStr(char* str) {
 	*(end + 1) = 0;
 	return str;
 }
-
 
