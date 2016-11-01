@@ -123,14 +123,9 @@ void readFromI2cReg(int i2cFileDesc, unsigned char regAddr) {
 
 	char value[7];
 	res = read(i2cFileDesc, &value, 7);
-//	for (int i = 0; i < 7; i++) {
-//		printf("res[%d] = %d\n", i, value[i]);
-//	}
+
 	x = (value[1] << 8) | (value[2]);
 	y = (value[3] << 8) | (value[4]);
 	z = (value[5] << 8) | (value[6]);
-//	printf("x = %d\n", x);
-//	printf("y = %d\n", y);
-//	printf("z = %d\n", z);
 }
 

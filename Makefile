@@ -8,19 +8,19 @@ src_objs := ${src_files:.c=.o}
 
 PUBDIR = ~/cmpt433/public/myApps
 
-all: beatbox
+all: beatbox wav node
 
 beatbox: $(src_objs)
 	$(CC) $(src_objs) -o beatbox $(LDFLAGS)
 	cp beatbox $(PUBDIR)/beatbox 
 
-# wav:
-# 	mkdir -p $(PUBDIR)/beatbox-wav-files/
-# 	cp -R beatbox-wave-files/* $(PUBDIR)/beatbox-wav-files/
+wav:
+	mkdir -p $(PUBDIR)/beatbox-wav-files/
+	cp -R wave-files/* $(PUBDIR)/beatbox-wav-files/
 
 node:
 	mkdir -p $(PUBDIR)/beatbox-server-copy/
-	cp -R as3-server/* $(PUBDIR)/beatbox-server-copy
+	cp -R server/* $(PUBDIR)/beatbox-server-copy
 
 clean:
 	rm *.o beatbox

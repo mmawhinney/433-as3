@@ -14,16 +14,18 @@ const unsigned int MS_TO_NS_FACTOR = 1000000;
 const unsigned int NSEC_MAX = 1000000000;
 const int PORT = 12345;
 
+#define X_AXIS_THRESHOLD 5000
+#define Y_AXIS_THRESHOLD 5000
+#define Z_AXIS_THRESHOLD 23500
+
 _Bool playing = false;
 struct timespec beat_delay;
 
-void Beat_init();
 void setMsDelay(int delayInMs);
 void calculateDelay();
 
 int main() {
 	AudioMixer_init();
-	Beat_init();
 	Control_init();
 	i2c_Init();
 	udp_startSocket(PORT);
@@ -41,11 +43,11 @@ int main() {
 			int x = getXValue();
 			int y = getYValue();
 			int z = getZValue();
-			if(x > 7500) {
+			if(x > X_AXIS_THRESHOLD) {
 				BeatController_playHiHat(hiHatFile);
-			} else if(y > 7500) {
+			} else if(y > Y_AXIS_THRESHOLD) {
 				BeatController_playSnare(snareFile);
-			} else if(z > 20000) {
+			} else if(z > Z_AXIS_THRESHOLD) {
 				BeatController_playBass(bassFile);
 			}
 			beat_delay.tv_sec = 0;
@@ -66,8 +68,6 @@ int main() {
 		}
 		}
 		beatCount++;
-		// printf("s : %ld, ns: %ld\n", beat_delay.tv_sec, beat_delay.tv_nsec);
-		// nanosleep(&beat_delay, NULL);
 		if (beatCount == 8) {
 			beatCount = 0;
 		}
@@ -77,12 +77,6 @@ int main() {
 	free(hiHatFile);
 	free(bassFile);
 	free(snareFile);
-}
-
-void Beat_init() {
-	calculateDelay();
-	// currentBeat = 1;
-	playing = true;
 }
 
 void setMsDelay(int delayInMs) {
